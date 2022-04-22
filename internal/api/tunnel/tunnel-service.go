@@ -2,8 +2,6 @@ package tunnel
 
 import (
 	"context"
-	_ "embed"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -21,7 +19,8 @@ import (
 	"github.com/thataway/common-lib/pkg/slice"
 	"github.com/thataway/common-lib/server"
 	netPrivate "github.com/thataway/iptunnel/internal/pkg/net"
-	"github.com/thataway/iptunnel/pkg/tunnel"
+	apiUtils "github.com/thataway/protos/pkg/api"
+	"github.com/thataway/protos/pkg/api/tunnel"
 	"github.com/vishvananda/netlink"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -44,8 +43,8 @@ var (
 	_ server.APIService          = (*tunnelService)(nil)
 	_ server.APIGatewayProxy     = (*tunnelService)(nil)
 
-	//go:embed tunnel.swagger.json
-	rawSwagger []byte
+	//GetSwaggerDocs get swagger spec docs
+	GetSwaggerDocs = apiUtils.Tunnel.LoadSwagger
 )
 
 const (
@@ -68,14 +67,6 @@ func NewTunnelService(ctx context.Context) server.APIService {
 		close(o.sema)
 	})
 	return ret
-}
-
-//GetSwaggerDocs get swagger spec docs
-func GetSwaggerDocs() (*server.SwaggerSpec, error) {
-	const api = "tunnel/GetSwaggerDocs"
-	ret := new(server.SwaggerSpec)
-	err := json.Unmarshal(rawSwagger, ret)
-	return ret, errors.Wrap(err, api)
 }
 
 //Description impl server.APIService
